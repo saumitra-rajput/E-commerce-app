@@ -52,7 +52,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: |
-            /frontend
+            frontend
             docker-compose.yml
           target: ~/production
 
