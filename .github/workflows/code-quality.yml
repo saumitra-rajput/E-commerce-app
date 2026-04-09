@@ -1,0 +1,45 @@
+# This workflow will check the code quality of Application
+# Linting and SAST scan
+# Lint - flake8 and SAST - Bandit
+
+
+name: code-quality
+
+on:
+  push:
+    branch: [main]
+
+      # workflow_call:
+
+jobs: 
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.11"]
+      steps:
+        - name: checkout code
+          uses: actions/checkout@v4
+
+        - name: Install python
+          uses: actions/setup-python@v5
+          with:
+            python-version: ${{  matrix.python-version }}
+
+        - name: Install dependencies
+          run: |
+            cd backend # app.py lives here
+            pip install -r requirements.txt
+
+        - name: Lint check
+          run: |
+            cd backend
+            flake8 app.py
+
+        - name: SAST -static application security testing
+          run: |
+            cd backend
+            bandit -r app.py
+
+  
