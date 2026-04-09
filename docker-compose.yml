@@ -19,7 +19,7 @@ services:
       - my-net
 
   backend:
-    image: ${DOCKERHUB_USER}/e-commerce:${IMAGE_TAG}
+    image: saumitrarajput/e-commerce:${IMAGE_TAG} # turn around for now hardcoded the dockerhub user id
     container_name: web-backend
     restart: unless-stopped
     ports:
