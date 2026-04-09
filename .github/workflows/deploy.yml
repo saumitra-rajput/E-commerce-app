@@ -28,8 +28,19 @@ jobs:
           script: |
             echo "Installing required package & folder....."
             sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
-            sudo usermod -aG docker $USER && newgrp docker 
+            sudo usermod -aG docker $USER
+            newgrp docker 
             mkdir -p production
+            cd ~/production
+            # Create .env file from GitHub Secrets (never stored in repo)
+            cat > .env << EOF
+            DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}
+            MYSQL_ROOT_PASSWORD=root123
+            MYSQL_DATABASE=ecommerce
+            MYSQL_USER=root
+            MYSQL_PASSWORD=root123
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            EOF
             echo "postive" 
             
 # Logging successfully worked onto the next step
@@ -40,7 +51,9 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: docker-compose.yml
+          source: |
+            /frontend
+            docker-compose.yml
           target: ~/production
 
 # Code copied worked successfully.

@@ -1,5 +1,57 @@
+# version: '3.8'
+
 services:
-  app:
-    image: ${DOCKERHUB_USER}/e-commerce:${IMAGE_TAG}
+  mysql:
+    image: mysql:8.0
+    container_name: e-sql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: ecommerce
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123
     ports:
-      - "8080:5000"
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my-net
+
+  backend:
+    image: ${DOCKERHUB_USER}/e-commerce:${IMAGE_TAG}
+    container_name: web-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123
+      MYSQL_DB: ecommerce
+      JWT_SECRET: super-secret-key
+    depends_on:
+      - mysql
+    networks:
+      - my-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: web-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+      - backend
+    networks:
+      - my-net
+
+networks:
+  my-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+
