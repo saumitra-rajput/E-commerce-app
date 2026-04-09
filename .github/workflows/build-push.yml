@@ -30,4 +30,4 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ vars.DOCKERHUB_USER }}/devsecops:${{ github.sha }}
+          tags: ${{ vars.DOCKERHUB_USER }}/e-commerce:${{ github.sha }}
