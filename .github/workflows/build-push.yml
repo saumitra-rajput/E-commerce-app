@@ -1,0 +1,33 @@
+# This workflow will build the image from docker file.
+# And push the image to DockerHub with the SHA ID.
+
+
+name: Build and Push 
+
+on: 
+  # workflow_call:
+    
+  # push:
+  #   branches: [ main ]
+
+# For comment this push for testing other workflows
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_SECRET }}
+          
+      - name: Build  and Push the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ vars.DOCKERHUB_USER }}/devsecops:${{ github.sha }}
