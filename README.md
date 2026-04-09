@@ -75,6 +75,9 @@ JWT_SECRET_KEY=your-secret-key
 FRONTEND_PORT=8080
 
 
+Working on CICD pipeline.
+
+
 🌐 Access
 Frontend: http://localhost:8080
 
