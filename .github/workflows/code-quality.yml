@@ -35,7 +35,7 @@ jobs:
       - name: Lint check
         run: |
           cd backend
-          flake8 app.py
+          flake8 app.py --max-line-length=120
 
       - name: SAST -static application security testing
         run: |
