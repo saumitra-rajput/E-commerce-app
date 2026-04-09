@@ -6,10 +6,7 @@
 name: code-quality
 
 on:
-  push:
-    #branch: [main]
-
-    workflow_call:
+  workflow_call:
 
 jobs: 
   validate:

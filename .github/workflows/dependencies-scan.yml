@@ -1,0 +1,29 @@
+# packages - issues or vulnerabilities (scan)
+# pip-audit
+
+
+name: dependency-scan
+on: 
+  push:
+
+jobs:
+  dep-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      
+      - name: setup python on version- 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      
+      - name: Install pip audit
+        run: |
+          cd backend # requirements lives here
+          pip install pip-audit
+      
+      - name: Audit dependencies for Packages (audit scans your installed packages)
+        run: |
+          cd backend # requirements lives here
+          pip-audit -r requirements.txt 
