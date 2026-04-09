@@ -1,0 +1,18 @@
+# Hadolint for Dockerfile scan
+
+name: docker-scan
+
+on:
+  push:
+
+jobs: 
+  scan-dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
