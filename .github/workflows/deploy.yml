@@ -1,0 +1,61 @@
+# This workflow Will do the deployment on EC2
+
+name: Test-Deployment-to-server
+
+on: 
+  workflow_call:
+  # workflow_run:
+  #   workflows: ["Build and Push"] 
+  #   types: [completed]
+  #   branches: [main]
+
+jobs:
+  deploy:
+    env:
+      DOCKERHUB_USER: ${{ vars.DOCKERHUB_USER }}
+      IMAGE_TAG: ${{ github.sha }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: SSH to EC2 server and create folder- production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Installing required package & folder....."
+            sudo apt-get update && sudo apt-get install docker.io docker-compose-v2 -y
+            sudo usermod -aG docker $USER && newgrp docker 
+            mkdir -p production
+            echo "postive" 
+            
+# Logging successfully worked onto the next step
+  
+      - name: Copy the docker-compose file on server
+        uses: appleboy/scp-action@v1 
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: docker-compose.yml
+          target: ~/production
+
+# Code copied worked successfully.
+      
+      - name: SSH to EC2 server and Run the docker-compose file
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Logging into Docker and pull image to run the container"
+
+            export DOCKERHUB_USER=${{ vars.DOCKERHUB_USER }}
+            export DOCKERHUB_SECRET= ${{ secrets.DOCKERHUB_SECRET }}
+            export IMAGE_TAG=${{ github.sha }}
+            cd ~/production
+            docker compose down && docker compose up -d --build --force-recreate --pull always

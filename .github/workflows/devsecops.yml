@@ -1,0 +1,47 @@
+# DevSecOps-Pipeline
+ 
+name: DevSecOps End to End Pipeline
+
+on:
+   push:
+     branches: [ main ]
+
+jobs: 
+# CI
+
+  ## Check the Code Quality using Flake8 and SAST - static analysis security testing 
+  code-quality:
+    uses: ./.github/workflows/code-quality.yml
+  
+  ## Secret Scan with the # GitLeaks
+  secret-scan:
+    uses: ./.github/workflows/secret-scan.yml
+    secrets: inherit
+
+  ## Packages - issues or vulnerabilities (scan) with pip-audit
+  dependencies-scan:
+    uses: ./.github/workflows/dependencies-scan.yml
+
+  ## Hadolint for Dockerfile scan
+  docker-scan:
+    uses: ./.github/workflows/docker-scan.yml
+
+  ## Build and push once the security scans and tests are complete
+
+  build-push:
+    needs: [code-quality, secret-scan, dependencies-scan, docker-scan]
+    uses: ./.github/workflows/build-push.yml
+    secrets: inherit
+
+  ## image scan with Trivy
+  image-scan: 
+    needs: [build-push]
+    uses: ./.github/workflows/image-scan.yml
+    secrets: inherit
+
+# CD
+  ## Deploy to Production
+  deploy-to-prod:
+    needs: [image-scan]
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
