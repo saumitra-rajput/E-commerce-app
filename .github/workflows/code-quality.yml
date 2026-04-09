@@ -7,9 +7,9 @@ name: code-quality
 
 on:
   push:
-    branch: [main]
+    #branch: [main]
 
-      # workflow_call:
+    workflow_call:
 
 jobs: 
   validate:
