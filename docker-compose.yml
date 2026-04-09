@@ -1,0 +1,121 @@
+services:
+  
+  mysql:
+    image: mysql:8.0
+    container_name: e-sql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: ecommerce
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: app123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql 
+    networks:
+      - my-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 50s
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: e-ollama
+    restart: unless-stopped
+# port 11434 is already occupied by wsl on ubuntu+dockerdesktop setup
+# ports:   
+# - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - my-net  
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 13
+      start_period: 60s
+
+# one time job to pull tinyllama
+  tinyllama:
+    image: ollama/ollama:latest
+    container_name: pull_tiny
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command:
+      - |
+        ollama pull tinyllama
+    networks:
+      - my-net
+    restart: "no"
+        
+  backend:
+    build: ./backend
+    container_name: web-backend
+    restart: "unless-stopped"
+    ports:
+      - "5000:5000"
+    environment:
+      MYSQL_HOST: mysql
+      OLLAMA_URL: http://e-ollama:11434
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123
+      MYSQL_DB: ecommerce
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ollama:
+         condition: service_healthy
+      tinyllama:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 50s 
+    volumes:
+      - ./backend:/app
+    networks:
+      - my-net
+
+      
+  nginx:
+    image: nginx:alpine
+    container_name: web-nginx
+    restart: "unless-stopped"
+    ports:
+    - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - my-net
+    environment:
+      
+      OLLAMA_URL: http://ollama:11434
+      # depends_on:
+      #      backend:
+      # condition: service_healthy
+      #mysql:
+      #  condition: service_healthy
+      #ollama:
+      #  condition: service_healthy
+      #tinyllama:
+      # condition: service_completed_successfully
+
+networks:
+  my-net:
+    driver: bridge
+volumes:
+  mysql_data:
+  ollama_data:
