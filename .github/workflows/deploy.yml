@@ -51,9 +51,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: |
-            frontend/*
-            docker-compose.yml
+          source: "./frontend,./docker-compose.yml"
           target: ~/production
 
 # Code copied worked successfully.
