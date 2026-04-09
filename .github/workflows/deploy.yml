@@ -69,4 +69,13 @@ jobs:
             export DOCKERHUB_SECRET=${{ secrets.DOCKERHUB_SECRET }}
             export IMAGE_TAG=${{ github.sha }}
             cd ~/production
-            docker compose down && docker compose up -d --build --force-recreate --pull always
+            
+
+            # Create .env file with variables from GitHub
+            cat > .env << EOF
+            DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}
+            IMAGE_TAG=${{ github.sha }}
+            EOF
+            
+            docker compose down
+            docker compose up -d --build --force-recreate --pull always
