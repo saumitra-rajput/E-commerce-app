@@ -3,13 +3,13 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: e-sql
+    container_name: mysql
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: root123
+      #MYSQL_ROOT_PASSWORD: root123
       MYSQL_DATABASE: ecommerce
-      MYSQL_USER: root
+      #MYSQL_USER: root
       MYSQL_PASSWORD: root123
     ports:
       - "3306:3306"
@@ -44,7 +44,8 @@ services:
     volumes:
       - ./frontend:/usr/share/nginx/html
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - my-net
 

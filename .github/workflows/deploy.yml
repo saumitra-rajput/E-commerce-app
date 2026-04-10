@@ -77,5 +77,6 @@ jobs:
             IMAGE_TAG=${{ github.sha }}
             EOF
             
-            docker compose down
+            docker compose down -v
+            docker ps -a
             docker compose up -d --build --force-recreate --pull always
