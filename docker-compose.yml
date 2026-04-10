@@ -37,7 +37,14 @@ services:
       MYSQL_DB: ecommerce
       JWT_SECRET: super-secret-key
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 50s 
     networks:
       - my-net
 
@@ -49,9 +56,6 @@ services:
       - "8080:80"
     volumes:
       - ./frontend:/usr/share/nginx/html
-    depends_on:
-      backend:
-        condition: service_healthy
     networks:
       - my-net
 
