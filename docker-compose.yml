@@ -19,7 +19,7 @@ services:
       - my-net
 
   backend:
-    image: ${{ vars.DOCKERHUB_USER }}/e-commerce:${{ github.sha }}
+    image: ${vars.DOCKERHUB_USER}/e-commerce:${github.sha}
     container_name: web-backend
     restart: unless-stopped
     ports:
