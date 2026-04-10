@@ -19,7 +19,7 @@ services:
       - my-net
 
   backend:
-    image: ${saumitrarajput}/e-commerce:${IMAGE_TAG}
+    image: saumitrarajput/e-commerce:${IMAGE_TAG}
     container_name: web-backend
     restart: unless-stopped
     ports:
